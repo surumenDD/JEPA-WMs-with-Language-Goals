@@ -25,3 +25,11 @@ configs/cwtemp/
 MUJOCO_LOG.TXT
 
 macros.py
+
+# --- Added for Language Goal Fork ---
+outputs/
+wandb/
+*.pth
+*.pt
+*.ckpt
+__pycache__/

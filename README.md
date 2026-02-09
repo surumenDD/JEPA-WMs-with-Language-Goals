@@ -1,5 +1,46 @@
+# [Fork] JEPA-WMs with Language Goals
+
+> **Note**: This repository is a fork of [facebookresearch/jepa-wms](https://github.com/facebookresearch/jepa-wms), modified to experiment with **language-conditioned latent goal prediction** for planning. The original codebase is licensed under CC-BY-NC 4.0 by Meta AI Research, FAIR.
+
+## 📝 Modifications
+
+We have extended the original JEPA-WMs framework to support planning with language goals instead of just visual goals.
+Key changes include:
+- **Language Goal Head**: Added a new goal head architecture that conditions on text embeddings (e.g., from a pre-trained language model) to predict latent goal representations.
+- **Evaluation Scripts**: Modified evaluation pipelines to support text-based goal tasks.
+- **Custom Checks**: Added utility scripts like `simple_check.py` for environment verification.
+
+### 🧠 Language Goal Conditioning
+This fork introduces a **Language Goal Head** that predicts latent goal representations from text descriptions.
+1.  **Text Encoder**: Uses a pre-trained text encoder (e.g., CLIP, T5) to embed natural language goals.
+2.  **Goal Head**: A designated MLP/Transformer head that maps text embeddings to the same latent space as the JEPA-WM visual encoder.
+3.  **Planning**: The `GC_Agent` (Goal-Conditioned Agent) has been modified to accept these predicted latent goals for planning, allowing the agent to perform tasks specified by text instructions (e.g., "reach the red object").
+
+### 🚀 Usage (Language Goals)
+
+**Train the Language Goal Head:**
+We provide configurations for various pre-trained text encoders.
+
+| Model Variant | Description | Training Command |
+| :--- | :--- | :--- |
+| **CLIP (Base)** | Standard CLIP text encoder | `python app/lang_goal/train_goalhead.py --config-name=goalhead_train` |
+| **CLIP (Patch)** | CLIP with patch-level features | `python app/lang_goal/train_goalhead.py --config-name=goalhead_train_clip_patch` |
+| **SigLIP 2 (Patch)** | SigLIP 2 with patch features | `python app/lang_goal/train_goalhead.py --config-name=goalhead_train_siglip2_patch` |
+| **SigLIP 2 (v2)** | Advanced SigLIP 2 config | `python app/lang_goal/train_goalhead.py --config-name=goalhead_train_siglip2_v2` |
+
+**Run Language-Conditioned Evaluation:**
+To evaluate a trained model, use the corresponding evaluation config:
+
+```bash
+# Example for SigLIP 2 (Patch)
+python evals/main.py --fname configs/lang_goal/mw_lang_goal_eval_siglip2_patch.yaml
+```
+*Note: Ensure you point to your trained checkpoint path in the config or via command line arguments.*
+
+---
+
 <h1 align="center">
-    <p>🌍 <b>JEPA-WMs</b></p>
+    <p>🌍 <b>JEPA-WMs (Original)</b></p>
 </h1>
 
 <h2 align="center">

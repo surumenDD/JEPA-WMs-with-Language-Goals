@@ -1,0 +1,294 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Task-to-Text mapping for MetaWorld tasks
+# Maps task_id/task_name to natural language instructions
+# 
+# Format:
+#   task_name: "Natural language instruction"
+#
+# Reference: MetaWorld benchmark (https://zhanpenghe.github.io/publications/meta_world.pdf)
+
+# ==============================================================================
+# MT10 Tasks (10 core manipulation tasks)
+# ==============================================================================
+reach: "Reach to the target position"
+reach-v2: "Reach to the target position"
+mw-reach: "Reach to the target position"
+mw-reach-v2: "Reach to the target position"
+
+push: "Push the object to the target location"
+push-v2: "Push the object to the target location"
+mw-push: "Push the object to the target location"
+mw-push-v2: "Push the object to the target location"
+
+pick-place: "Pick up the object and place it at the target"
+pick-place-v2: "Pick up the object and place it at the target"
+mw-pick-place: "Pick up the object and place it at the target"
+mw-pick-place-v2: "Pick up the object and place it at the target"
+
+door-open: "Open the door by pulling the handle"
+door-open-v2: "Open the door by pulling the handle"
+mw-door-open: "Open the door by pulling the handle"
+mw-door-open-v2: "Open the door by pulling the handle"
+
+drawer-open: "Open the drawer by pulling it"
+drawer-open-v2: "Open the drawer by pulling it"
+mw-drawer-open: "Open the drawer by pulling it"
+mw-drawer-open-v2: "Open the drawer by pulling it"
+
+drawer-close: "Close the drawer by pushing it"
+drawer-close-v2: "Close the drawer by pushing it"
+mw-drawer-close: "Close the drawer by pushing it"
+mw-drawer-close-v2: "Close the drawer by pushing it"
+
+button-press-topdown: "Press the button from above"
+button-press-topdown-v2: "Press the button from above"
+mw-button-press-topdown: "Press the button from above"
+mw-button-press-topdown-v2: "Press the button from above"
+
+peg-insert-side: "Insert the peg into the hole from the side"
+peg-insert-side-v2: "Insert the peg into the hole from the side"
+mw-peg-insert-side: "Insert the peg into the hole from the side"
+mw-peg-insert-side-v2: "Insert the peg into the hole from the side"
+
+window-open: "Open the window by sliding it"
+window-open-v2: "Open the window by sliding it"
+mw-window-open: "Open the window by sliding it"
+mw-window-open-v2: "Open the window by sliding it"
+
+window-close: "Close the window by sliding it"
+window-close-v2: "Close the window by sliding it"
+mw-window-close: "Close the window by sliding it"
+mw-window-close-v2: "Close the window by sliding it"
+
+# ==============================================================================
+# MT50 Additional Tasks
+# ==============================================================================
+assembly: "Assemble the pieces together"
+assembly-v2: "Assemble the pieces together"
+mw-assembly: "Assemble the pieces together"
+mw-assembly-v2: "Assemble the pieces together"
+
+basketball: "Put the ball into the basket"
+basketball-v2: "Put the ball into the basket"
+mw-basketball: "Put the ball into the basket"
+mw-basketball-v2: "Put the ball into the basket"
+
+bin-picking: "Pick the object from the bin"
+bin-picking-v2: "Pick the object from the bin"
+mw-bin-picking: "Pick the object from the bin"
+mw-bin-picking-v2: "Pick the object from the bin"
+
+box-close: "Close the box lid"
+box-close-v2: "Close the box lid"
+mw-box-close: "Close the box lid"
+mw-box-close-v2: "Close the box lid"
+
+button-press: "Press the button"
+button-press-v2: "Press the button"
+mw-button-press: "Press the button"
+mw-button-press-v2: "Press the button"
+
+button-press-topdown-wall: "Press the button from above, avoiding the wall"
+button-press-topdown-wall-v2: "Press the button from above, avoiding the wall"
+mw-button-press-topdown-wall: "Press the button from above, avoiding the wall"
+mw-button-press-topdown-wall-v2: "Press the button from above, avoiding the wall"
+
+button-press-wall: "Press the button while avoiding the wall"
+button-press-wall-v2: "Press the button while avoiding the wall"
+mw-button-press-wall: "Press the button while avoiding the wall"
+mw-button-press-wall-v2: "Press the button while avoiding the wall"
+
+coffee-button: "Press the coffee machine button"
+coffee-button-v2: "Press the coffee machine button"
+mw-coffee-button: "Press the coffee machine button"
+mw-coffee-button-v2: "Press the coffee machine button"
+
+coffee-pull: "Pull the coffee mug towards you"
+coffee-pull-v2: "Pull the coffee mug towards you"
+mw-coffee-pull: "Pull the coffee mug towards you"
+mw-coffee-pull-v2: "Pull the coffee mug towards you"
+
+coffee-push: "Push the coffee mug to the target"
+coffee-push-v2: "Push the coffee mug to the target"
+mw-coffee-push: "Push the coffee mug to the target"
+mw-coffee-push-v2: "Push the coffee mug to the target"
+
+dial-turn: "Turn the dial"
+dial-turn-v2: "Turn the dial"
+mw-dial-turn: "Turn the dial"
+mw-dial-turn-v2: "Turn the dial"
+
+disassemble: "Disassemble the object"
+disassemble-v2: "Disassemble the object"
+mw-disassemble: "Disassemble the object"
+mw-disassemble-v2: "Disassemble the object"
+
+door-close: "Close the door"
+door-close-v2: "Close the door"
+mw-door-close: "Close the door"
+mw-door-close-v2: "Close the door"
+
+door-lock: "Lock the door"
+door-lock-v2: "Lock the door"
+mw-door-lock: "Lock the door"
+mw-door-lock-v2: "Lock the door"
+
+door-unlock: "Unlock the door"
+door-unlock-v2: "Unlock the door"
+mw-door-unlock: "Unlock the door"
+mw-door-unlock-v2: "Unlock the door"
+
+faucet-close: "Turn off the faucet"
+faucet-close-v2: "Turn off the faucet"
+mw-faucet-close: "Turn off the faucet"
+mw-faucet-close-v2: "Turn off the faucet"
+
+faucet-open: "Turn on the faucet"
+faucet-open-v2: "Turn on the faucet"
+mw-faucet-open: "Turn on the faucet"
+mw-faucet-open-v2: "Turn on the faucet"
+
+hammer: "Hammer the nail"
+hammer-v2: "Hammer the nail"
+mw-hammer: "Hammer the nail"
+mw-hammer-v2: "Hammer the nail"
+
+hand-insert: "Insert the hand into the slot"
+hand-insert-v2: "Insert the hand into the slot"
+mw-hand-insert: "Insert the hand into the slot"
+mw-hand-insert-v2: "Insert the hand into the slot"
+
+handle-press: "Press the handle down"
+handle-press-v2: "Press the handle down"
+mw-handle-press: "Press the handle down"
+mw-handle-press-v2: "Press the handle down"
+
+handle-press-side: "Press the handle from the side"
+handle-press-side-v2: "Press the handle from the side"
+mw-handle-press-side: "Press the handle from the side"
+mw-handle-press-side-v2: "Press the handle from the side"
+
+handle-pull: "Pull the handle"
+handle-pull-v2: "Pull the handle"
+mw-handle-pull: "Pull the handle"
+mw-handle-pull-v2: "Pull the handle"
+
+handle-pull-side: "Pull the handle from the side"
+handle-pull-side-v2: "Pull the handle from the side"
+mw-handle-pull-side: "Pull the handle from the side"
+mw-handle-pull-side-v2: "Pull the handle from the side"
+
+lever-pull: "Pull the lever"
+lever-pull-v2: "Pull the lever"
+mw-lever-pull: "Pull the lever"
+mw-lever-pull-v2: "Pull the lever"
+
+peg-unplug-side: "Unplug the peg from the side"
+peg-unplug-side-v2: "Unplug the peg from the side"
+mw-peg-unplug-side: "Unplug the peg from the side"
+mw-peg-unplug-side-v2: "Unplug the peg from the side"
+
+pick-out-of-hole: "Pick the object out of the hole"
+pick-out-of-hole-v2: "Pick the object out of the hole"
+mw-pick-out-of-hole: "Pick the object out of the hole"
+mw-pick-out-of-hole-v2: "Pick the object out of the hole"
+
+pick-place-wall: "Pick and place the object, avoiding the wall"
+pick-place-wall-v2: "Pick and place the object, avoiding the wall"
+mw-pick-place-wall: "Pick and place the object, avoiding the wall"
+mw-pick-place-wall-v2: "Pick and place the object, avoiding the wall"
+
+plate-slide: "Slide the plate"
+plate-slide-v2: "Slide the plate"
+mw-plate-slide: "Slide the plate"
+mw-plate-slide-v2: "Slide the plate"
+
+plate-slide-back: "Slide the plate back"
+plate-slide-back-v2: "Slide the plate back"
+mw-plate-slide-back: "Slide the plate back"
+mw-plate-slide-back-v2: "Slide the plate back"
+
+plate-slide-back-side: "Slide the plate back from the side"
+plate-slide-back-side-v2: "Slide the plate back from the side"
+mw-plate-slide-back-side: "Slide the plate back from the side"
+mw-plate-slide-back-side-v2: "Slide the plate back from the side"
+
+plate-slide-side: "Slide the plate from the side"
+plate-slide-side-v2: "Slide the plate from the side"
+mw-plate-slide-side: "Slide the plate from the side"
+mw-plate-slide-side-v2: "Slide the plate from the side"
+
+push-back: "Push the object back"
+push-back-v2: "Push the object back"
+mw-push-back: "Push the object back"
+mw-push-back-v2: "Push the object back"
+
+push-wall: "Push the object to the target, avoiding the wall"
+push-wall-v2: "Push the object to the target, avoiding the wall"
+mw-push-wall: "Push the object to the target, avoiding the wall"
+mw-push-wall-v2: "Push the object to the target, avoiding the wall"
+
+reach-wall: "Reach to the target position, avoiding the wall"
+reach-wall-v2: "Reach to the target position, avoiding the wall"
+mw-reach-wall: "Reach to the target position, avoiding the wall"
+mw-reach-wall-v2: "Reach to the target position, avoiding the wall"
+
+shelf-place: "Place the object on the shelf"
+shelf-place-v2: "Place the object on the shelf"
+mw-shelf-place: "Place the object on the shelf"
+mw-shelf-place-v2: "Place the object on the shelf"
+
+soccer: "Kick the ball into the goal"
+soccer-v2: "Kick the ball into the goal"
+mw-soccer: "Kick the ball into the goal"
+mw-soccer-v2: "Kick the ball into the goal"
+
+stick-pull: "Pull the stick"
+stick-pull-v2: "Pull the stick"
+mw-stick-pull: "Pull the stick"
+mw-stick-pull-v2: "Pull the stick"
+
+stick-push: "Push the stick"
+stick-push-v2: "Push the stick"
+mw-stick-push: "Push the stick"
+mw-stick-push-v2: "Push the stick"
+
+sweep: "Sweep the object to the target"
+sweep-v2: "Sweep the object to the target"
+mw-sweep: "Sweep the object to the target"
+mw-sweep-v2: "Sweep the object to the target"
+
+sweep-into: "Sweep the object into the container"
+sweep-into-v2: "Sweep the object into the container"
+mw-sweep-into: "Sweep the object into the container"
+mw-sweep-into-v2: "Sweep the object into the container"
+
+# ==============================================================================
+# Template generation settings
+# ==============================================================================
+_template:
+  # Default template for unknown tasks
+  # {task_name} will be replaced with the actual task name
+  default: "Complete the {task_name} task"
+  
+  # Patterns to transform task names to instructions
+  patterns:
+    - pattern: "(.+)-open"
+      template: "Open the {0}"
+    - pattern: "(.+)-close"
+      template: "Close the {0}"
+    - pattern: "(.+)-push"
+      template: "Push the {0}"
+    - pattern: "(.+)-pull"
+      template: "Pull the {0}"
+    - pattern: "(.+)-press"
+      template: "Press the {0}"
+    - pattern: "pick-(.+)"
+      template: "Pick up the {0}"
+    - pattern: "place-(.+)"
+      template: "Place the object at the {0}"

@@ -1,0 +1,17 @@
+# Data Index Generation Configuration
+# ==============================================================================
+# This config specifies how to create the data index for GoalHead training.
+# ==============================================================================
+
+# Data paths
+data_path: "${JEPAWM_DSET}/Metaworld/data"
+output_path: "${JEPAWM_LOGS}/lang_goal/index"
+
+# Split configuration
+split_seed: 42
+train_ratio: 0.7
+val_ratio: 0.15
+test_ratio: 0.15
+
+# Task-to-text mapping
+task_to_text_file: "${JEPAWM_HOME}/jepa-wms/assets/lang_goal/task_to_text.yaml"

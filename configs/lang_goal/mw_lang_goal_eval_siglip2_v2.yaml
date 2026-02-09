@@ -1,0 +1,189 @@
+# Language-Conditioned Goal Planning Evaluation Configuration
+# ==============================================================================
+# SigLIP2 + ImprovedGoalHead v2 (Q-Former) Evaluation
+# Based on mw_lang_goal_eval_clip_patch.yaml, adapted for SigLIP2 v2 training
+# ==============================================================================
+
+nodes: 1
+tasks_per_node: 1
+cpus_per_task: 8
+mem_per_gpu: 32G
+copy_code: false
+
+# Output configuration
+folder: "${JEPAWM_LOGS}"
+tag: lang_goal_eval/siglip2_v2_mw_reach
+
+# Evaluation type
+eval_name: lang_goal
+
+# Meta settings
+meta:
+  quick_debug: false
+  seed: 1
+  eval_episodes: 20
+
+# Distributed settings
+distributed:
+  distribute_multitask_eval: true
+  local_rng_samplers: true
+  seed_shift: horizon_1000
+
+# Logging settings
+logging:
+  exp_name: lang_goal_planning_siglip2_v2
+  save_csv: true
+  tqdm_silent: false
+  optional_plots: true
+
+# ==============================================================================
+# Model configuration - MUST match training config exactly
+# ==============================================================================
+model_kwargs:
+  module_name: "app.vjepa_wm.modelcustom.simu_env_planning.vit_enc_preds"
+  checkpoint: "${JEPAWM_CKPT}/pretrained/mw_jepa-wm.pth.tar"
+  data:
+    dataset_type: custom
+    datasets:
+      - METAWORLD_HF
+    datasets_weights: null
+    seed: 1
+    img_size: 224
+    loader:
+      batch_size: 1
+      num_workers: 1
+      pin_mem: true
+      persistent_workers: false
+    custom:
+      split_ratio: 0.9
+      frameskip: 5
+      action_skip: 1
+      state_skip: 1
+      normalize_action: true
+      traj_subset: true
+      filter_first_episodes: null
+      filter_tasks: null
+      num_hist: 3
+      num_pred: 1
+      with_reward: false
+      custom_teleop_dset: null
+  data_aug:
+    normalize: [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]]
+  wrapper_kwargs:
+    ctxt_window: 2
+  pretrain_kwargs:
+    grid_size: 16
+    tubelet_size_enc: 1
+    use_activation_checkpointing: false
+    action_conditioning: token
+    proprio_encoding: feature
+    num_frames_pred: 4
+    visual_encoder:
+      enc_type: dino
+      enc_version: dinov2_vits14
+      pretrain_enc_path: null
+      pretrain_enc_ckpt_key: target_encoder
+      embed_dim: 384
+      enc_use_rope: null
+      enc_name: null
+      use_sdpa_enc: true
+      num_frames_enc: 16
+      uniform_power: true
+    action_encoder:
+      action_tokens: 1
+      action_emb_dim: 0
+      act_mlp: false
+      action_encoder_inpred: true
+    proprio_encoder:
+      proprio_tokens: 0
+      proprio_emb_dim: 16
+      prop_mlp: false
+      proprio_encoder_inpred: false
+    predictor:
+      tubelet_size: 1
+      pred_num_heads: 16
+      pred_depth: 6
+      pred_embed_dim: 384
+      pred_use_extrinsics: false
+      pred_type: AdaLN
+      act_pred_projector: false
+      use_SiLU: false
+      use_rope: true
+    wm_encoding:
+      batchify_video: true
+      dup_image: false
+      normalize_reps: false
+    attn:
+      local_window_time: 3
+      local_window_h: -1
+      local_window_w: -1
+    heads_cfg:
+      architectures: {}
+      pretrain_dec_path: {}
+
+# ==============================================================================
+# GoalHead checkpoint - SigLIP2 v2 (latest training run)
+# ==============================================================================
+goalhead_checkpoint: "${JEPAWM_CKPT}/lang_goal/goalhead/20260207_200729/best_model.pth"
+
+# GoalHead architecture info (must match training config)
+goalhead_config:
+  version: "v2"
+  use_improved: true
+  visual_dim: 384
+  text_dim: 1024
+  output_dim: 384
+  hidden_dim: 512
+  num_layers: 2
+  num_attention_heads: 8
+  dropout: 0.0
+  fusion_mode: "qformer"
+  num_queries: 16
+  use_gated_attn: true
+  film_hops: 3
+
+# Text encoder configuration - SigLIP2 (must match training)
+text_encoder:
+  type: "siglip2"
+  model_name: "google/siglip2-large-patch16-512"
+  lowercase: false
+
+# Whether to also run baseline (image goal) evaluation
+run_baseline: true
+
+# ==============================================================================
+# Task specification - img_size=224 to match training data
+# ==============================================================================
+task_specification:
+  task: mw-reach
+  obs: rgb_state
+  obs_concat_channels: false
+  goal_source: expert
+  succ_def: simu
+  done_at_succ: false
+  max_episode_steps: 100
+  goal_H: 6
+  num_frames: 1
+  num_proprios: 1
+  img_size: 224
+  env:
+    with_target: true
+    with_velocity: true
+    freeze_rand_vec: false
+
+# Planner configuration (CEM)
+planner:
+  planner_name: cem
+  iterations: 15
+  num_samples: 300
+  num_elites: 10
+  horizon: 6
+  var_scale: 1.0
+  num_act_stepped: 3
+  repeat_actskip: false
+  decode_each_iteration: false
+  distribute_planner: false
+  planning_objective:
+    objective_type: L2
+    sum_all_diffs: false
+    alpha: 0.0  # No proprio prediction from GoalHead

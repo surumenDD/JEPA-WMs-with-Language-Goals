@@ -1,0 +1,250 @@
+# Language-Conditioned Goal Head Training Configuration
+# ==============================================================================
+# IMPROVED GOALHEAD v2 with SigLIP2:
+# Key improvements:
+# 1. Attention Pooling (MAP head) instead of mean pooling
+# 2. Q-Former style learnable queries for cross-modal fusion
+# 3. Gated cross-attention for training stability
+# 4. Enhanced loss: cosine + contrastive + delta regularization
+# ==============================================================================
+
+# Experiment settings
+seed: 42
+use_wandb: true
+wandb_project: "jepa-lang-goal"
+experiment_name: "goalhead_siglip2_v2_qformer"
+
+# Training hyperparameters
+num_epochs: 100
+batch_size: 32
+learning_rate: 1.0e-4
+weight_decay: 1.0e-5
+mixed_precision: true
+clip_grad: 1.0
+save_every: 10
+
+# Loss weights (v2 loss function)
+loss_version: "v2"  # Use compute_goal_loss_v2
+l2_weight: 1.0
+cosine_weight: 0.5      # v2: Always enabled for direction alignment
+contrastive_weight: 0.1 # v2: InfoNCE with hard negatives
+delta_reg_weight: 0.01  # v2: Delta norm regularization
+temperature: 0.07       # For contrastive loss
+
+# ==============================================================================
+# FR-2: Distillation Loss Configuration
+# ==============================================================================
+distillation:
+  enabled: true
+  distillation_weight: 1.0
+  cosine_weight: 0.1
+  temperature: 1.0
+
+# ==============================================================================
+# FR-4: Paraphrase Invariance Configuration
+# ==============================================================================
+paraphrase_invariance:
+  enabled: true
+  weight: 0.1
+  mode: "centroid"
+  num_paraphrases: 3
+  share_base_embedding: true
+
+# ==============================================================================
+# FR-5: Prompt Tuning Configuration
+# ==============================================================================
+prompt_tuning:
+  enabled: true
+  num_context_tokens: 16
+  init_strategy: "random"
+  context_position: "prefix"
+
+# ==============================================================================
+# FR-6: Contrastive Learning Configuration
+# ==============================================================================
+contrastive:
+  enabled: true
+  weight: 0.1
+  temperature: 0.07
+  num_negatives: 5
+  negative_types:
+    - "intra_batch"
+    - "temporal"
+  temporal_margin: 5
+  dataset_hard_negatives: false
+
+# ==============================================================================
+# GoalHead v2 Architecture - ImprovedGoalHead with Q-Former
+# ==============================================================================
+goal_head:
+  version: "v2"          # Use ImprovedGoalHead
+  use_improved: true     # Alternative flag
+  visual_dim: 384        # DINOv2 ViT-S output dimension
+  text_dim: 1024         # SigLIP2 large dimension
+  output_dim: 384        # Match visual encoder latent dimension
+  hidden_dim: 512
+  num_layers: 2
+  num_attention_heads: 8
+  dropout: 0.1
+  # v2-specific options:
+  fusion_mode: "qformer" # Options: "qformer", "gated_cross_attn", "multihop_film", "concat"
+  num_queries: 16        # Number of Q-Former learnable queries
+  use_gated_attn: true   # Use gated cross-attention for stability
+  film_hops: 3           # Number of hops for multihop_film mode
+
+# Text encoder configuration - SigLIP2
+text_encoder:
+  type: "siglip2"
+  model_name: "google/siglip2-large-patch16-512"
+  lowercase: false  # Siglip2Tokenizer handles lowercasing internally
+
+# Text ensemble configuration
+text_ensemble:
+  enabled: true
+  task_texts:
+    mw-reach:
+      - "Move the robot gripper to the red target marker and touch it."
+      - "Touch the red target marker on the table with the gripper tip."
+      - "Reach the red target marker and make contact with the end-effector."
+      - "The gripper tip is touching the red target marker on the tabletop."
+      - "The robot end-effector reaches the red target marker and touches it."
+    mw-reach-wall:
+      - "Move the robot gripper to the red target marker and touch it without touching the wall."
+      - "Touch the red target marker with the gripper tip while avoiding contact with the wall."
+      - "Reach the red target marker and make contact, and do not collide with the wall obstacle."
+      - "The gripper tip is touching the red target marker and the wall is not touched."
+      - "The robot end-effector reaches and touches the red target marker with no wall contact."
+    mw-push:
+      - "Push the object to the target location with the gripper."
+      - "Use the robot gripper to push the object towards the goal position."
+      - "Move the object by pushing it to the designated target spot."
+      - "The gripper pushes the object until it reaches the target area."
+      - "Push the block to the red target marker on the table."
+    mw-pick-place:
+      - "Pick up the object and place it at the target location."
+      - "Grasp the object with the gripper and move it to the goal position."
+      - "Lift the object and set it down at the designated target spot."
+      - "The gripper picks up the block and places it on the target."
+      - "Pick and place the object to the red target marker."
+
+# Data paths
+data_path: "${JEPAWM_DSET}/Metaworld/data"
+index_dir: "${JEPAWM_LOGS}/lang_goal/index"
+num_workers: 4
+use_proprio: false
+
+# Pretrained JEPA-WM checkpoint
+pretrained_checkpoint: "${JEPAWM_CKPT}/pretrained/mw_jepa-wm.pth.tar"
+
+# Model configuration for loading pretrained JEPA-WM
+model_kwargs:
+  module_name: app.vjepa_wm.modelcustom.simu_env_planning.vit_enc_preds
+  checkpoint: null
+  pretrain_kwargs:
+    grid_size: 16
+    tubelet_size_enc: 1
+    use_activation_checkpointing: false
+    action_conditioning: token
+    proprio_encoding: feature
+    num_frames_pred: 4
+    visual_encoder:
+      enc_type: dino
+      enc_version: dinov2_vits14
+      pretrain_enc_path: null
+      pretrain_enc_ckpt_key: target_encoder
+      embed_dim: 384
+      enc_use_rope: null
+      enc_name: null
+      use_sdpa_enc: true
+      num_frames_enc: 16
+      uniform_power: true
+    action_encoder:
+      action_tokens: 1
+      action_emb_dim: 0
+      act_mlp: false
+      action_encoder_inpred: true
+    proprio_encoder:
+      proprio_tokens: 0
+      proprio_emb_dim: 16
+      proprio_mlp: false
+      proprio_encoder_inpred: false
+    predictor:
+      tubelet_size: 1
+      pred_num_heads: 16
+      pred_depth: 6
+      pred_embed_dim: 384
+      pred_use_extrinsics: false
+      pred_type: AdaLN
+      act_pred_projector: false
+      use_SiLU: false
+      use_rope: true
+    wm_encoding:
+      batchify_video: true
+      dup_image: false
+      normalize_reps: false
+    rollout_cfg:
+      rollout_steps: 2
+    loss:
+      l2_weight: 1.0
+  data:
+    dataset_type: custom
+    datasets:
+      - METAWORLD_HF
+    datasets_weights: null
+    seed: 42
+    img_size: 224
+    validation:
+      val_datasets: []
+      val_datasets_1: null
+      num_frames_val: 18
+      val_dataset_batch_size: 4
+      val_dataset_drop_last: false
+      val_dataset_fpcs: [8]
+      val_dataset_camera_views: ["exterior_image_2_left"]
+      val_viz_rank0_loader: false
+    loader:
+      batch_size: 8
+      num_workers: 16
+      pin_mem: true
+      persistent_workers: true
+    custom:
+      split_ratio: 0.9
+      frameskip: 5
+      action_skip: 1
+      state_skip: 1
+      normalize_action: true
+      traj_subset: true
+      filter_first_episodes: null
+      filter_tasks: null
+      num_hist: 3
+      num_pred: 1
+      with_reward: false
+      custom_teleop_dset: null
+    droid:
+      camera_frame: false
+      camera_views: [2]
+      droid_to_rcasa_action_format: 1
+      rcasa_to_droid_action_format: false
+      fps: 4
+      dataset_fpcs: [8]
+      mpk_manifest_patterns: []
+  data_aug:
+    auto_augment: false
+    random_horizontal_flip: false
+    motion_shift: false
+    random_resize_aspect_ratio: [1.0, 1.0]
+    random_resize_scale: [1.777, 1.777]
+    reprob: 0.0
+    normalize: [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]]
+  wrapper_kwargs:
+    ctxt_window: 2
+
+# Output directory
+output_dir: "${JEPAWM_CKPT}/lang_goal/goalhead_siglip2_v2"
+
+# Scheduler
+scheduler:
+  type: cosine
+  warmup_epochs: 5
+  min_lr: 1.0e-6
+  min_lr: 1.0e-6

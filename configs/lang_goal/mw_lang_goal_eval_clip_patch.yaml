@@ -1,0 +1,176 @@
+# Language-Conditioned Goal Planning Evaluation Configuration
+# ==============================================================================
+# CLIP + PatchLevelGoalHead Evaluation
+# ==============================================================================
+
+nodes: 1
+tasks_per_node: 1
+cpus_per_task: 8
+mem_per_gpu: 32G
+copy_code: false
+
+# Output configuration
+folder: "${JEPAWM_LOGS}"
+tag: lang_goal_eval/clip_patch_mw_reach
+
+# Evaluation type
+eval_name: lang_goal
+
+# Meta settings
+meta:
+  quick_debug: false
+  seed: 1
+  eval_episodes: 20
+
+# Distributed settings
+distributed:
+  distribute_multitask_eval: true
+  local_rng_samplers: true
+  seed_shift: horizon_1000
+
+# Logging settings
+logging:
+  exp_name: lang_goal_planning_clip_patch
+  save_csv: true
+  tqdm_silent: false
+  optional_plots: true
+
+# Model configuration (matched to oracle_reach_eval.yaml for compatibility)
+model_kwargs:
+  module_name: "app.vjepa_wm.modelcustom.simu_env_planning.vit_enc_preds"
+  checkpoint: "${JEPAWM_CKPT}/pretrained/mw_jepa-wm.pth.tar"
+  data:
+    dataset_type: custom
+    datasets:
+      - METAWORLD_HF
+    datasets_weights: null
+    seed: 1
+    img_size: 224
+    loader:
+      batch_size: 1
+      num_workers: 2
+      pin_mem: true
+      persistent_workers: false
+    custom:
+      split_ratio: 0.9
+      frameskip: 5
+      action_skip: 1
+      state_skip: 1
+      normalize_action: true
+      traj_subset: true
+      filter_first_episodes: null
+      filter_tasks: null
+      num_hist: 3
+      num_pred: 1
+      with_reward: false
+      custom_teleop_dset: null
+  data_aug:
+    normalize: [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]]
+  wrapper_kwargs:
+    ctxt_window: 2
+  pretrain_kwargs:
+    grid_size: 16
+    tubelet_size_enc: 1
+    use_activation_checkpointing: false
+    action_conditioning: token
+    proprio_encoding: feature
+    num_frames_pred: 4
+    visual_encoder:
+      enc_type: dino
+      enc_version: dinov2_vits14
+      pretrain_enc_path: null
+      pretrain_enc_ckpt_key: target_encoder
+      embed_dim: 384
+      enc_use_rope: null
+      enc_name: null
+      use_sdpa_enc: true
+      num_frames_enc: 16
+      uniform_power: true
+    action_encoder:
+      action_tokens: 1
+      action_emb_dim: 0
+      act_mlp: false
+      action_encoder_inpred: true
+    proprio_encoder:
+      proprio_tokens: 0
+      proprio_emb_dim: 16
+      prop_mlp: false
+      proprio_encoder_inpred: false
+    predictor:
+      tubelet_size: 1
+      pred_num_heads: 16
+      pred_depth: 6
+      pred_embed_dim: 384
+      pred_use_extrinsics: false
+      pred_type: AdaLN
+      act_pred_projector: false
+      use_SiLU: false
+      use_rope: true
+    wm_encoding:
+      batchify_video: true
+      dup_image: false
+      normalize_reps: false
+    attn:
+      local_window_time: 3
+      local_window_h: -1
+      local_window_w: -1
+    heads_cfg:
+      architectures: {}
+      pretrain_dec_path: {}
+
+# GoalHead checkpoint (CLIP + PatchLevel)
+goalhead_checkpoint: "${JEPAWM_CKPT}/lang_goal/goalhead/20260205_222202/best_model.pth"
+
+# GoalHead architecture info
+goalhead_config:
+  patch_level: true
+  visual_dim: 384
+  text_dim: 512
+  output_dim: 384
+  num_patches: 256
+  hidden_dim: 512
+  num_layers: 3
+  num_attention_heads: 8
+
+# Text encoder configuration - CLIP
+text_encoder:
+  type: "huggingface_clip"
+  model_name: "openai/clip-vit-base-patch32"
+
+# Whether to also run baseline (image goal) evaluation
+run_baseline: true
+
+# Task specification
+task_specification:
+  task: mw-reach
+  obs: rgb_state
+  obs_concat_channels: false
+  goal_source: expert
+  succ_def: simu
+  done_at_succ: false
+  max_episode_steps: 100
+  goal_H: 6
+  num_frames: 1
+  num_proprios: 1
+  img_size: 256
+  env:
+    with_target: true
+    with_velocity: true
+    freeze_rand_vec: false
+
+# Planner configuration (CEM)
+planner:
+  planner_name: cem
+  iterations: 15
+  num_samples: 300
+  num_elites: 10
+  horizon: 6
+  var_scale: 1.0
+  num_act_stepped: 3
+  repeat_actskip: false
+  decode_each_iteration: false
+  distribute_planner: false
+  planning_objective:
+    objective_type: L2
+    sum_all_diffs: false
+    alpha: 0.1

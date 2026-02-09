@@ -5,6 +5,7 @@
 # licensed under the MIT License
 
 import torch
+from tensordict import TensorDict
 
 from evals.simu_env_planning.planning.planning.objectives import (
     ReprTargetCosMPCObjective,
@@ -121,6 +122,67 @@ class GC_Agent:
 
         if self.planner is not None:
             self.planner.set_objective(self.objective)
+
+    @torch.no_grad()
+    def set_goal_from_embedding(self, z_goal_visual, z_goal_proprio=None):
+        """
+        Set goal state from pre-computed embeddings (e.g., from GoalHead).
+        
+        For Lang-Goal: GoalHead predicts only visual embedding, so we use alpha=0
+        in the objective to ignore proprio distance.
+        
+        Args:
+            z_goal_visual: Visual goal embedding [1, T, V, H, W, D] or [1, T, N, D]
+            z_goal_proprio: Optional proprio goal embedding [1, T, 1, P]. 
+                           If None, creates zero placeholder (use with alpha=0).
+        """
+        assert z_goal_visual is not None, "Visual goal embedding is required."
+        
+        # Ensure correct device
+        z_goal_visual = z_goal_visual.to(self.device)
+        
+        # Create proprio placeholder if not provided
+        if z_goal_proprio is None:
+            # Get proprio dim from model config
+            proprio_emb_dim = getattr(self.model, 'proprio_emb_dim', 16)
+            # Create zero placeholder with matching shape
+            # z_goal_visual shape: [1, T, V, H, W, D] or [1, T, N, D]
+            batch_size = z_goal_visual.shape[0]
+            time_steps = z_goal_visual.shape[1]
+            z_goal_proprio = torch.zeros(
+                batch_size, time_steps, 1, proprio_emb_dim,
+                device=self.device, dtype=z_goal_visual.dtype
+            )
+            logger.info(f"📌 Created zero proprio placeholder (use alpha=0 in objective)")
+        else:
+            z_goal_proprio = z_goal_proprio.to(self.device)
+        
+        # Create TensorDict for goal state encoding
+        self.goal_state_enc = TensorDict({
+            "visual": z_goal_visual,
+            "proprio": z_goal_proprio
+        }, device=self.device)
+        
+        # Set up objective
+        if self.cfg.planner.planning_objective.objective_type == "L2":
+            self.objective = ReprTargetDistMPCObjective(
+                self.cfg, target_enc=self.goal_state_enc, **self.cfg.planner.planning_objective
+            )
+        elif self.cfg.planner.planning_objective.objective_type == "L1":
+            self.objective = ReprTargetDistL1MPCObjective(
+                self.cfg, target_enc=self.goal_state_enc, **self.cfg.planner.planning_objective
+            )
+        elif self.cfg.planner.planning_objective.objective_type == "repr_sim":
+            self.objective = ReprTargetCosMPCObjective(
+                self.cfg, target_enc=self.goal_state_enc, **self.cfg.planner.planning_objective
+            )
+        else:
+            raise ValueError(f"Unknown objective type: {self.cfg.planner.planning_objective.objective_type}")
+
+        if self.planner is not None:
+            self.planner.set_objective(self.objective)
+        
+        logger.info(f"🎯 Goal set from embedding: visual={z_goal_visual.shape}, proprio={z_goal_proprio.shape}")
 
     def plan(
         self,

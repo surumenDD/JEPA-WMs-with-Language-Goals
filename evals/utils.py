@@ -104,6 +104,7 @@ def make_datasets(cfgs_data, cfgs_data_aug, world_size=1, rank=0, filter_first_e
             # robocasa
             "output_rcasa_state": True,
             "output_rcasa_info": True,
+            "batch_size": 1,  # Default batch_size for evaluation
         }
     )
 

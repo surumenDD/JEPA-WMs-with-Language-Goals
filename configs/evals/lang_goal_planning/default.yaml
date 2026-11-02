@@ -1,0 +1,90 @@
+# Language-conditioned Goal Planning Evaluation Configuration
+#
+# This config file defines settings for evaluating the GoalHead model
+# on MetaWorld tasks, comparing Lang-Goal planning vs Oracle planning.
+
+# Model paths
+model:
+  # Pre-trained JEPA-WM checkpoint
+  jepa_wm_checkpoint: "/home/ryo52/checkpoints/jepa_lang_goal/pretrained/mw_jepa-wm.pth.tar"
+  
+  # Trained GoalHead checkpoint
+  goalhead_checkpoint: "/home/ryo52/checkpoints/jepa_lang_goal/lang_goal/goalhead/20260201_234248/best_model.pth"
+  
+  # Model architecture (must match training)
+  visual_dim: 384
+  text_dim: 512
+  output_dim: 384
+  hidden_dim: 512
+  num_layers: 2
+  fusion_mode: "concat"
+  
+  # JEPA-WM architecture
+  patch_size: 16
+  tubelet_size_enc: 2
+  img_size: 256
+  grid_size: 14
+  
+  # Text encoder
+  text_encoder_name: "all-MiniLM-L6-v2"
+
+# CEM Planner configuration
+planner:
+  planner_name: "cem"
+  horizon: 12
+  iterations: 6
+  num_samples: 512
+  num_elites: 64
+  elite_ratio: 0.1
+  action_dim: 4  # MetaWorld action dimension
+  action_min: -1.0
+  action_max: 1.0
+
+# Evaluation configuration
+evaluation:
+  # Output directory for results
+  output_dir: "/home/ryo52/checkpoints/jepa_lang_goal/lang_goal/evaluation"
+  
+  # Device
+  device: "cuda:0"
+  
+  # Random seed
+  seed: 42
+  
+  # Episodes per task
+  episodes_per_task: 10
+  
+  # Maximum steps per episode
+  max_episode_steps: 100
+  
+  # Tasks to evaluate (subset of MetaWorld ML1 tasks)
+  tasks:
+    - "assembly-v2"
+    - "bin-picking-v2"
+    - "button-press-v2"
+    - "door-close-v2"
+    - "door-open-v2"
+    - "drawer-close-v2"
+    - "drawer-open-v2"
+    - "hammer-v2"
+  
+  # Evaluation modes
+  run_offline: true   # Compute L2/cosine errors
+  run_online: true    # Run planning in environment
+
+# Test data configuration (for offline evaluation)
+test_data:
+  # Path to test dataset (should match GoalHead training data format)
+  data_path: "/home/ryo52/data/metaworld/trajectories"
+  
+  # Number of samples for offline evaluation
+  num_samples: 100
+  
+  # Split to use
+  split: "test"
+
+# Logging configuration
+logging:
+  level: "INFO"
+  save_videos: false
+  video_interval: 10  # Save video every N episodes

@@ -1,0 +1,79 @@
+# Language-conditioned Goal Planning Evaluation Configuration
+# ============================================================
+# For CLIP + PatchLevelGoalHead evaluation
+# ============================================================
+
+# Model paths
+model:
+  # Pre-trained JEPA-WM checkpoint
+  jepa_wm_checkpoint: "${JEPAWM_CKPT}/pretrained/mw_jepa-wm.pth.tar"
+  
+  # Trained GoalHead checkpoint (CLIP + PatchLevel)
+  goalhead_checkpoint: "${JEPAWM_CKPT}/lang_goal/goalhead/20260205_222202/best_model.pth"
+  
+  # Model architecture - PatchLevelGoalHead
+  patch_level: true
+  visual_dim: 384
+  text_dim: 512  # CLIP ViT-B/32 dimension
+  output_dim: 384
+  num_patches: 256  # 16x16
+  hidden_dim: 512
+  num_layers: 3
+  num_attention_heads: 8
+  
+  # JEPA-WM architecture
+  patch_size: 14  # DINOv2 ViT-S/14
+  tubelet_size_enc: 1
+  img_size: 224
+  grid_size: 16  # 224/14 = 16
+  
+  # Text encoder - HuggingFace CLIP
+  text_encoder_type: "huggingface_clip"
+  text_encoder_name: "openai/clip-vit-base-patch32"
+
+# CEM Planner configuration
+planner:
+  planner_name: "cem"
+  horizon: 12
+  iterations: 6
+  num_samples: 512
+  num_elites: 64
+  elite_ratio: 0.1
+  action_dim: 4  # MetaWorld action dimension
+  action_min: -1.0
+  action_max: 1.0
+
+# Evaluation configuration
+evaluation:
+  # Output directory for results
+  output_dir: "${JEPAWM_LOGS}/lang_goal/evaluation_clip_patch"
+  
+  # Device
+  device: "cuda:0"
+  
+  # Number of episodes per task
+  num_episodes: 10
+  
+  # Maximum steps per episode
+  max_steps: 150
+  
+  # Tasks to evaluate
+  tasks:
+    - mw-reach
+
+# Goal expansion configuration
+goal_expansion:
+  # For PatchLevelGoalHead, output is already [B, N, D]
+  # No expansion needed
+  method: "none"
+  
+# Text ensemble for inference
+text_ensemble:
+  enabled: true
+  texts:
+    mw-reach:
+      - "Move the robot gripper to the red target marker and touch it."
+      - "Touch the red target marker on the table with the gripper tip."
+      - "Reach the red target marker and make contact with the end-effector."
+      - "The gripper tip is touching the red target marker on the tabletop."
+      - "The robot end-effector reaches the red target marker and touches it."
